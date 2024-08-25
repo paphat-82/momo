@@ -1,0 +1,115 @@
+
+
+# Namespace where the deployment will be created
+namespace: momo
+
+# Name of the application
+fullname: app-momo
+
+# Number of replicas
+replicaCount: 2
+
+# History limit of revisions
+revisionHistoryLimit: 10
+
+# Deployment strategy
+deploymentStrategy:
+  type: RollingUpdate
+  rollingUpdate:
+    maxUnavailable: 1
+    maxSurge: 1
+
+# Labels for the deployment and pods
+labels:
+  app: app-momo
+  environment: production
+
+# Selector and Labels for the deployment and pods
+selector:
+  matchLabels:
+    app: app-momo
+    environment: production
+
+# Template labels for the deployment and pods
+template:
+  labels:
+    app: app-momo
+    environment: production
+
+# Image configuration
+image:
+  repository: docker.io/paphat82/react-api
+  tag: v10
+  pullPolicy: IfNotPresent
+
+# Container configuration
+containers:
+  containerPort: 80
+  env:
+    - name: TZ
+      value: "Asia/Bangkok"
+  resources:
+    limits:
+      memory: 3Gi
+      cpu: '1'
+    requests:
+      memory: 50Mi
+      cpu: 50m
+
+# Volumes and Persistent Storage
+volumes:
+  create_PV: true
+  create_PVC: true
+  labels:
+    app: app-momo
+    environment: production
+  PersistentVolumeTemplate:
+    metadata:
+      name: app-momo-pv
+      labels:
+        app: app-momo
+        environment: production
+    spec:
+      capacity:
+        storage: 3Gi
+      accessModes:
+        - ReadWriteOnce
+      storageClassName: longhorn
+      hostPath:
+        path: /mnt/disks/app-momo
+
+  PersistentVolumeClaimTemplate:
+    metadata:
+      name: app-momo
+      labels:
+        app: app-momo
+        environment: production
+    spec:
+      accessModes:
+        - ReadWriteOnce
+      resources:
+        requests:
+          storage: 3Gi
+      storageClassName: longhorn
+
+service:
+  enabled: true
+  type: ClusterIP
+  port: 80
+  labels:
+    app: app-momo
+  containerPort: 80
+
+serviceAccount:
+  create: false
+  use_existing: false
+  name: ""
+
+# HPA configuration
+hpa:
+  minReplicas: 1
+  maxReplicas: 10
+  metrics:
+    cpu:
+      averageUtilization: 40
+
