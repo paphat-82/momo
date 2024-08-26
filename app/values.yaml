@@ -91,7 +91,8 @@ volumes:
         requests:
           storage: 3Gi
       storageClassName: longhorn
-
+      
+# service configuration
 service:
   enabled: true
   type: ClusterIP
@@ -111,5 +112,5 @@ hpa:
   maxReplicas: 10
   metrics:
     cpu:
-      averageUtilization: 40
+      averageUtilization: 50
 
